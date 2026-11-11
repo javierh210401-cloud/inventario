@@ -860,7 +860,7 @@ $('inviteBtn').addEventListener('click', async () => {
     s: S.suppliers.map(s => [s.id, s.name, s.color, s.areas, s.orderDays, s.deliveryDays]),
     p: S.products.map(p => [p.id, p.name, p.sup, p.area, p.cat, p.ideal, p.unit]) };
   const url = appUrl() + '#i=' + await pack(d);
-  const head = `Hola 👋 Te paso la app de inventario de ${S.biz}.\n\n1. Abre el enlace en el móvil.\n2. Instálala: en Android, menú ⋮ → «Instalar app». En iPhone, botón Compartir → «Añadir a pantalla de inicio».\n3. Haz el recuento y pulsa «Enviar recuento».`;
+  const head = `Hola 👋 Te paso la app de inventario de ${S.biz}.\n\n1. Abre el enlace en el móvil. En Android, con Google Chrome (en Samsung, no uses Samsung Internet).\n2. Instálala: en Chrome, menú ⋮ → «Instalar app». En iPhone, con Safari: botón Compartir → «Añadir a pantalla de inicio».\n3. Haz el recuento y pulsa «Enviar recuento».`;
   $('setDlg').close();
   share('Invitar a un encargado', esc(head) + `\n\n<span class="muted">${S.products.length} productos · ${S.suppliers.length} proveedores</span>`,
     `${head}\n\n${url}`, '', S.ownerPhone ? '' : 'Pon tu WhatsApp en Ajustes antes de invitar, así los recuentos te llegan directamente.');
@@ -936,12 +936,25 @@ $('stName').addEventListener('input', e => { S.me = e.target.value.trim(); save(
 /* ---- Instalar en el móvil ---- */
 let installPrompt = null;
 const standalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+// Samsung Internet crea la app instalada de otra forma y Play Protect puede marcarla como «no segura».
+// En ese navegador se recomienda abrir la app en Chrome (conservando el enlace de invitación/recuento).
+const isSamsung = /SamsungBrowser/i.test(navigator.userAgent);
+const isAndroid = /Android/i.test(navigator.userAgent);
+const entryHash = location.hash;
+function chromeIntent() {
+  const target = location.host + location.pathname + (/^#[ri]=[A-Za-z0-9_-]+$/.test(entryHash) ? entryHash : '');
+  return `intent://${target}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent('https://' + target)};end`;
+}
 function updateInstall() {
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  $('heroInstall').classList.toggle('hidden', !installPrompt || standalone());
-  $('installBtn').classList.toggle('hidden', !installPrompt || standalone());
+  const samsungWarn = isSamsung && isAndroid && isWeb() && !standalone();
+  $('samsungWarn').classList.toggle('hidden', !samsungWarn);
+  if (samsungWarn) $('openChrome').href = chromeIntent();
+  $('heroInstall').classList.toggle('hidden', !installPrompt || standalone() || isSamsung);
+  $('installBtn').classList.toggle('hidden', !installPrompt || standalone() || isSamsung);
   $('installHint').textContent = standalone() ? 'La app ya está instalada en este dispositivo.'
     : !isWeb() ? 'Para instalarla, ábrela desde su dirección web (cuando esté publicada).'
+    : isSamsung ? 'Estás en Samsung Internet: instálala desde Chrome para evitar el aviso de Play Protect (botón «Abrir en Chrome» arriba).'
     : ios ? 'En iPhone: abre esta página en Safari, pulsa el botón Compartir y luego «Añadir a pantalla de inicio».'
     : installPrompt ? 'Pulsa el botón para añadirla a tu pantalla de inicio como una app más.'
     : 'En Android (Chrome): menú ⋮ → «Instalar app» o «Añadir a pantalla de inicio».';
@@ -952,7 +965,7 @@ async function doInstall() { if (!installPrompt) return; installPrompt.prompt();
 $('installBtn').addEventListener('click', doInstall);
 $('heroInstall').addEventListener('click', doInstall);
 /* ---- Versión, actualizaciones y portapapeles ---- */
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 if ('serviceWorker' in navigator && isWeb()) {
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {

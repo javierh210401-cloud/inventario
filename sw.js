@@ -1,6 +1,6 @@
 // Service worker: la app funciona sin conexión y siempre intenta cargar la última versión.
 // Solo guarda y sirve archivos de esta misma web (nunca de terceros).
-const CACHE = 'waitiki-inventario-v3';
+const CACHE = 'waitiki-inventario-v4';
 const SHELL = ['./', './index.html', './app.css', './app.js', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './icon.svg',
   './fonts/fraunces.woff2', './fonts/jakarta.woff2'];

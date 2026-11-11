@@ -346,3 +346,8 @@ dialog { max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-ar
 .secure-list { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--muted); }
 .secure-list li { margin: 4px 0; }
 .version { font-size: 12px; color: var(--muted); text-align: center; margin-top: 20px; }
+.browser-warn { margin-top: 12px; padding: 14px; border-radius: 14px; background: var(--gold-soft); border: 1px solid var(--gold);
+  display: grid; gap: 6px; }
+.browser-warn b { font-size: 14.5px; }
+.browser-warn span { font-size: 13.5px; color: var(--muted); }
+.browser-warn .btn { justify-self: start; margin-top: 4px; text-decoration: none; }
